@@ -2,6 +2,8 @@
 
 **Vitrine profissional para tatuadores** com painel administrativo completo, galeria de fotos/vídeos, chat integrado, música ambiente e busca de referências no Pinterest.
 
+acesse : juniortattoos.netlify.app
+
 ## ✨ Destaques
 - 🔐 Login seguro com hash SHA-256
 - 📸 Upload de fotos/vídeos (galeria ou URL)
