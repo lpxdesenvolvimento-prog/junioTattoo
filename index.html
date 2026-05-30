@@ -37,7 +37,7 @@
             backdrop-filter: blur(10px); z-index: 1000; padding: 15px 20px;
             display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(212,175,55,0.3);
         }
-        .logo { font-size: 24px; font-weight: bold; background: linear-gradient(135deg, #d4af37, #ffd700); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo { font-size: 24px; font-weight: bold; color: #d4af37; }
         .admin-btn { background: #d4af37; color: #000; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; }
         .menu-icon { display: inline-block; margin-left: 15px; cursor: pointer; color: #d4af37; font-size: 24px; }
 
@@ -213,12 +213,10 @@
 
     <script>
         // ============================================================
-        // CONFIGURAÇÕES INICIAIS
+        // DADOS GLOBAIS
         // ============================================================
-        
         let isAdminLogged = false;
         
-        // Dados que serão salvos
         let profileData = {
             name: "Junior Tattoo",
             title: "🎨 Especialista em Realismo | Tatuador Profissional",
@@ -236,29 +234,26 @@
         let playlist = [];
         
         // ============================================================
-        // FUNÇÕES DE SALVAR E CARREGAR
+        // FUNÇÕES DE SALVAR E CARREGAR (CORRIGIDAS)
         // ============================================================
         
-        function salvarTudo() {
+        function salvarDados() {
             const dadosCompletos = {
                 profile: profileData,
                 fotos: fotos,
                 videos: videos,
-                playlist: playlist,
-                dataSalvamento: new Date().toISOString()
+                playlist: playlist
             };
             localStorage.setItem('junior_tattoo_data', JSON.stringify(dadosCompletos));
-            console.log('💾 DADOS SALVOS!', {
+            console.log('💾 SALVO COM SUCESSO!', {
                 nome: profileData.name,
                 whatsapp: profileData.whatsapp,
-                foto: profileData.avatar.substring(0, 50) + '...',
-                fotosCount: fotos.length,
-                videosCount: videos.length
+                temFoto: profileData.avatar ? 'sim' : 'não'
             });
             return true;
         }
         
-        function carregarTudo() {
+        function carregarDados() {
             const salvos = localStorage.getItem('junior_tattoo_data');
             if (salvos) {
                 try {
@@ -267,22 +262,39 @@
                     if (dados.fotos) fotos = dados.fotos;
                     if (dados.videos) videos = dados.videos;
                     if (dados.playlist) playlist = dados.playlist;
-                    console.log('📀 DADOS CARREGADOS!', {
+                    console.log('📀 CARREGADO!', {
                         nome: profileData.name,
-                        whatsapp: profileData.whatsapp,
-                        dataSalvamento: dados.dataSalvamento
+                        whatsapp: profileData.whatsapp
                     });
-                    return true;
                 } catch(e) {
-                    console.log('Erro ao carregar dados');
+                    console.log('Erro ao carregar, usando padrão');
+                    carregarPadrao();
                 }
+            } else {
+                carregarPadrao();
             }
             
-            // Dados padrão se não houver nada salvo
+            // Garantir que o WhatsApp não fique vazio
+            if (!profileData.whatsapp) profileData.whatsapp = "5511999999999";
+            
+            renderizarSite();
+        }
+        
+        function carregarPadrao() {
+            profileData = {
+                name: "Junior Tattoo",
+                title: "🎨 Especialista em Realismo | Tatuador Profissional",
+                bio: "Especialista em realismo, aquarela e blackwork. 8 anos de experiência transformando ideias em arte na pele.",
+                avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop",
+                stats: { tattoos: "500+", years: "8", satisfaction: "100%" },
+                whatsapp: "5511999999999",
+                instagram: "https://instagram.com/junior_tattoo",
+                facebook: "https://facebook.com/junior_tattoo",
+                tiktok: "https://tiktok.com/@junior_tattoo"
+            };
             fotos = [
                 { url: "https://images.unsplash.com/photo-1618457072880-a447c93f2edc?w=400&h=400&fit=crop", titulo: "Realismo Leão", tipo: "foto" },
-                { url: "https://images.unsplash.com/photo-1590247813693-5541d1c609fd?w=400&h=400&fit=crop", titulo: "Aquarela Flores", tipo: "foto" },
-                { url: "https://images.unsplash.com/photo-1607283105705-b083fd3e7a58?w=400&h=400&fit=crop", titulo: "Blackwork Geométrico", tipo: "foto" }
+                { url: "https://images.unsplash.com/photo-1590247813693-5541d1c609fd?w=400&h=400&fit=crop", titulo: "Aquarela Flores", tipo: "foto" }
             ];
             videos = [
                 { url: "https://www.w3schools.com/html/mov_bbb.mp4", titulo: "Processo Tatuagem", tipo: "video" }
@@ -291,12 +303,11 @@
                 { nome: "🎸 Lo-fi Hip Hop", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
                 { nome: "🎵 Chill Beats", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" }
             ];
-            salvarTudo();
-            return false;
+            salvarDados();
         }
         
         // ============================================================
-        // SEGURANÇA - SENHA
+        // SENHA
         // ============================================================
         
         let senhaHash = localStorage.getItem('junior_tattoo_password');
@@ -350,7 +361,7 @@
         }
         
         // ============================================================
-        // TROCAR FOTO DO PERFIL - AGORA SALVA!
+        // TROCAR FOTO (CORRIGIDO - SALVA!)
         // ============================================================
         
         function trocarFotoPerfil() {
@@ -366,30 +377,26 @@
             input.onchange = async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
-                
                 const base64 = await arquivoParaBase64(file);
                 profileData.avatar = base64;
-                salvarTudo(); // SALVA IMEDIATAMENTE
+                salvarDados();
                 renderizarSite();
-                alert('✅ Foto de perfil atualizada e SALVA com sucesso!');
-                if (isAdminLogged) mostrarLogin(); // Atualiza o modal
+                alert('✅ Foto de perfil atualizada e SALVA!');
+                if (isAdminLogged) mostrarLogin();
             };
             input.click();
         }
         
         // ============================================================
-        // GERENCIAR MÍDIAS - AGORA SALVA!
+        // GERENCIAR MÍDIAS
         // ============================================================
         
         function deletarMidia(tipo, index) {
             if (!isAdminLogged) return;
             if (confirm('Tem certeza que deseja excluir esta mídia?')) {
-                if (tipo === 'foto') {
-                    fotos.splice(index, 1);
-                } else {
-                    videos.splice(index, 1);
-                }
-                salvarTudo(); // SALVA IMEDIATAMENTE
+                if (tipo === 'foto') fotos.splice(index, 1);
+                else videos.splice(index, 1);
+                salvarDados();
                 renderizarGaleria();
                 if (isAdminLogged) mostrarLogin();
                 alert('✅ Mídia removida e SALVA!');
@@ -410,7 +417,7 @@
                     const novaMidia = { url: base64, titulo: sanitizar(titulo), tipo: tipo };
                     if (tipo === 'foto') fotos.push(novaMidia);
                     else videos.push(novaMidia);
-                    salvarTudo(); // SALVA IMEDIATAMENTE
+                    salvarDados();
                     renderizarGaleria();
                     alert('✅ Mídia adicionada e SALVA!');
                 }
@@ -424,7 +431,7 @@
             const titulo = prompt("Título da imagem:");
             if (url && titulo) {
                 fotos.push({ url: url, titulo: sanitizar(titulo), tipo: 'foto' });
-                salvarTudo(); // SALVA IMEDIATAMENTE
+                salvarDados();
                 renderizarGaleria();
                 alert('✅ Imagem adicionada e SALVA!');
             }
@@ -497,7 +504,7 @@
             const nome = prompt("Nome da música:");
             if (url && nome) {
                 playlist.push({ nome: sanitizar(nome), url: url });
-                salvarTudo();
+                salvarDados();
                 renderizarPlaylist();
                 alert('✅ Música adicionada e SALVA!');
             }
@@ -512,7 +519,7 @@
         }
         
         // ============================================================
-        // ADMIN - PAINEL DE CONTROLE
+        // ADMIN - PAINEL (CORRIGIDO - SALVA WHATSAPP!)
         // ============================================================
         
         async function mostrarLogin() {
@@ -543,7 +550,7 @@
                             
                             <h3 style="margin-top: 20px;">🔐 Alterar Senha</h3>
                             <input type="password" id="oldPassword" class="admin-input" placeholder="Senha atual">
-                            <input type="password" id="newPassword" class="admin-input" placeholder="Nova senha">
+                            <input type="password" id="newPassword" class="admin-input" placeholder="Nova senha (min 6 caracteres)">
                             <input type="password" id="confirmPassword" class="admin-input" placeholder="Confirmar nova senha">
                             <button class="admin-btn" onclick="alterarSenha()" style="background: #d4af37; color: #000; width: 100%;">Alterar Senha</button>
                             
@@ -587,6 +594,10 @@
                 alert('❌ As novas senhas não coincidem!');
                 return;
             }
+            if (senhaNova.length < 6) {
+                alert('❌ A nova senha deve ter pelo menos 6 caracteres!');
+                return;
+            }
             const valido = await verificarSenha(senhaAntiga);
             if (!valido) {
                 alert('❌ Senha atual incorreta!');
@@ -617,15 +628,13 @@
             profileData.stats.satisfaction = sanitizar(novaSatisfacao);
             
             // SALVAR TUDO!
-            salvarTudo();
+            salvarDados();
             
             // Atualizar a tela
             renderizarSite();
             fecharAdminModal();
             
-            alert('✅ PERFIL SALVO COM SUCESSO!\n\n' +
-                  '📌 Nome: ' + profileData.name + '\n' +
-                  '📌 WhatsApp: ' + profileData.whatsapp);
+            alert('✅ PERFIL SALVO COM SUCESSO!\n\n📌 Nome: ' + profileData.name + '\n📌 WhatsApp: ' + profileData.whatsapp);
         }
         
         function logout() {
@@ -638,7 +647,7 @@
         }
         
         // ============================================================
-        // FUNÇÕES DO SITE - CLIENTE
+        // FUNÇÕES DO SITE
         // ============================================================
         
         function abrirMedia(url, tipo) {
@@ -680,7 +689,7 @@
             carregarMensagens();
             input.value = '';
             setTimeout(() => {
-                const respostas = ["Obrigado! Me chama no WhatsApp para mais detalhes 📱", "Adorei a ideia! Vamos marcar uma consulta? 🖤", "Tenho disponibilidade essa semana!"];
+                const respostas = ["Obrigado! Me chama no WhatsApp 📱", "Adorei! Vamos marcar? 🖤", "Tenho disponibilidade essa semana!"];
                 mensagens.push({ nome: 'Junior', mensagem: respostas[Math.floor(Math.random() * respostas.length)], hora: new Date().toLocaleTimeString(), isUser: false });
                 localStorage.setItem('junior_tattoo_chat', JSON.stringify(mensagens));
                 carregarMensagens();
@@ -689,14 +698,11 @@
         
         function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
         
-        function shareWhatsApp() { window.open(`https://wa.me/?text=🎨 Conheça o trabalho do ${encodeURIComponent(profileData.name)}!`, '_blank'); }
+        function shareWhatsApp() { window.open(`https://wa.me/${profileData.whatsapp}?text=Olá! Vi seu trabalho e me interessei!`, '_blank'); }
         function shareInstagram() { window.open(profileData.instagram, '_blank'); }
-        function shareFacebook() { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank'); }
+        function shareFacebook() { window.open(profileData.facebook, '_blank'); }
         function shareTikTok() { window.open(profileData.tiktok, '_blank'); }
-        function openWhatsApp() { 
-            const numero = profileData.whatsapp.replace(/\D/g, '');
-            window.open(`https://wa.me/${numero}?text=Olá! Gostaria de agendar um horário.`, '_blank'); 
-        }
+        function openWhatsApp() { window.open(`https://wa.me/${profileData.whatsapp}?text=Olá! Gostaria de agendar um horário.`, '_blank'); }
         
         async function buscarPinterest() {
             const searchTerm = document.getElementById('pinterestSearch').value;
@@ -727,10 +733,7 @@
             document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
         }
         
-        // ============================================================
-        // EXPOR FUNÇÕES GLOBAIS
-        // ============================================================
-        
+        // EXPOR FUNÇÕES
         window.trocarFotoPerfil = trocarFotoPerfil;
         window.uploadArquivo = uploadArquivo;
         window.adicionarPorURL = adicionarPorURL;
@@ -757,16 +760,13 @@
         window.buscarPinterest = buscarPinterest;
         window.alterarSenha = alterarSenha;
         
-        // ============================================================
         // INICIAR
-        // ============================================================
-        
         async function iniciar() {
             await inicializarSenha();
-            carregarTudo();
-            renderizarSite();
-            console.log('🚀 Site iniciado! Use Admin/senha: admin123');
-            console.log('📌 Dados salvos no localStorage com a chave: junior_tattoo_data');
+            carregarDados();
+            console.log('🚀 Site JUNIOR TATTOO iniciado!');
+            console.log('📌 Senha admin: admin123');
+            console.log('📌 WhatsApp atual: ' + profileData.whatsapp);
         }
         
         iniciar();
