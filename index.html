@@ -165,12 +165,8 @@
             padding: 80px 20px 40px;
         }
 
-        /* Perfil */
+        /* Perfil - CORRIGIDO (sem botão de edição para clientes) */
         .profile-section { text-align: center; margin-bottom: 50px; }
-        .avatar-container {
-            position: relative;
-            display: inline-block;
-        }
         .profile-avatar {
             width: 150px;
             height: 150px;
@@ -179,21 +175,6 @@
             object-fit: cover;
             margin-bottom: 20px;
         }
-        .edit-avatar-btn {
-            position: absolute;
-            bottom: 25px;
-            right: 5px;
-            background: #d4af37;
-            border: none;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            cursor: pointer;
-            color: #000;
-            display: none;
-        }
-        .avatar-container:hover .edit-avatar-btn { display: flex; align-items: center; justify-content: center; }
-        
         .profile-name { font-size: 32px; margin-bottom: 10px; }
         .profile-title { color: #d4af37; font-size: 18px; margin-bottom: 15px; }
         .profile-bio { max-width: 600px; margin: 0 auto; color: #aaa; line-height: 1.6; }
@@ -562,13 +543,9 @@
     </div>
 
     <div class="container" id="home">
+        <!-- PERFIL - CORRIGIDO (sem botão de edição para clientes) -->
         <div class="profile-section" id="profileSection">
-            <div class="avatar-container">
-                <img id="profileAvatar" class="profile-avatar" src="" alt="Perfil">
-                <button class="edit-avatar-btn" onclick="trocarFotoPerfil()" title="Trocar foto">
-                    <i class="fas fa-camera"></i>
-                </button>
-            </div>
+            <img id="profileAvatar" class="profile-avatar" src="" alt="Perfil">
             <h1 class="profile-name" id="profileName">Carregando...</h1>
             <div class="profile-title" id="profileTitle"></div>
             <div class="profile-bio" id="profileBio"></div>
@@ -631,10 +608,9 @@
 
     <script>
         // ============================================================
-        // SEGURANÇA - Proteção contra XSS, SQL Injection e CSRF
+        // SEGURANÇA - Proteção contra XSS
         // ============================================================
         
-        // Função para sanitizar entradas (proteção XSS)
         function sanitizar(texto) {
             if (!texto) return '';
             const div = document.createElement('div');
@@ -642,7 +618,6 @@
             return div.innerHTML;
         }
         
-        // Função para escapar HTML (proteção XSS)
         function escaparHTML(str) {
             return str.replace(/[&<>]/g, function(m) {
                 if (m === '&') return '&amp;';
@@ -652,7 +627,6 @@
             });
         }
         
-        // Validação de senha forte
         function validarSenhaForte(senha) {
             if (senha.length < 6) return { valido: false, msg: "Mínimo 6 caracteres" };
             if (!/[A-Z]/.test(senha)) return { valido: false, msg: "Pelo menos 1 letra maiúscula" };
@@ -661,7 +635,6 @@
             return { valido: true, msg: "Senha forte" };
         }
         
-        // Hash simples para senha (simulando bcrypt)
         async function hashSenha(senha) {
             const encoder = new TextEncoder();
             const data = encoder.encode(senha + "inkmaster_salt_2024");
@@ -669,10 +642,8 @@
             return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
         
-        // Armazenar senha com hash
         let senhaHash = localStorage.getItem('inkmaster_password_hash') || null;
         
-        // Senha padrão inicial (ink123) com hash
         async function inicializarSenha() {
             if (!senhaHash) {
                 senhaHash = await hashSenha('ink123');
@@ -680,27 +651,23 @@
             }
         }
         
-        // Verificar senha
         async function verificarSenha(senha) {
             const hash = await hashSenha(senha);
             return hash === senhaHash;
         }
         
-        // Trocar senha
         async function trocarSenha(senhaAntiga, senhaNova) {
             const valido = await verificarSenha(senhaAntiga);
             if (!valido) return { sucesso: false, msg: "Senha atual incorreta!" };
-            
             const validacao = validarSenhaForte(senhaNova);
             if (!validacao.valido) return { sucesso: false, msg: validacao.msg };
-            
             senhaHash = await hashSenha(senhaNova);
             localStorage.setItem('inkmaster_password_hash', senhaHash);
             return { sucesso: true, msg: "Senha alterada com sucesso!" };
         }
         
         // ============================================================
-        // DADOS DO SITE (Criptografados)
+        // DADOS DO SITE
         // ============================================================
         
         let isAdminLogged = false;
@@ -721,7 +688,6 @@
         let videos = [];
         let playlist = [];
         
-        // Converter arquivo para Base64
         function arquivoParaBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -731,7 +697,7 @@
             });
         }
         
-        // Trocar foto do perfil
+        // Trocar foto do perfil - disponível APENAS no admin
         function trocarFotoPerfil() {
             if (!isAdminLogged) {
                 alert('🔒 Faça login como administrador primeiro!');
@@ -745,7 +711,6 @@
             input.onchange = async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
-                
                 const base64 = await arquivoParaBase64(file);
                 profileData.avatar = base64;
                 salvarDados();
@@ -755,10 +720,8 @@
             input.click();
         }
         
-        // Carregar dados
         function carregarDados() {
             inicializarSenha();
-            
             const saved = localStorage.getItem('inkmaster_data');
             if (saved) {
                 try {
@@ -873,33 +836,20 @@
             }
         }
         
-        // Upload de arquivos
         function uploadArquivo(tipo) {
             if (!isAdminLogged) return;
-            
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = tipo === 'foto' ? 'image/*' : 'video/*';
             input.onchange = async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
-                
                 const base64 = await arquivoParaBase64(file);
                 const titulo = prompt("Digite um título para esta mídia:", file.name.split('.')[0]);
-                
                 if (titulo) {
-                    const novaMidia = {
-                        url: base64,
-                        titulo: sanitizar(titulo),
-                        tipo: tipo
-                    };
-                    
-                    if (tipo === 'foto') {
-                        fotos.push(novaMidia);
-                    } else {
-                        videos.push(novaMidia);
-                    }
-                    
+                    const novaMidia = { url: base64, titulo: sanitizar(titulo), tipo: tipo };
+                    if (tipo === 'foto') fotos.push(novaMidia);
+                    else videos.push(novaMidia);
                     salvarDados();
                     renderizarGaleria();
                     alert('✅ Mídia adicionada com sucesso!');
@@ -908,7 +858,6 @@
             input.click();
         }
         
-        // Pinterest
         async function buscarPinterest() {
             const searchTerm = document.getElementById('pinterestSearch').value;
             const termoSanitizado = sanitizar(searchTerm);
@@ -920,7 +869,6 @@
             const grid = document.getElementById('pinterestGrid');
             grid.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 48px;"></i><p>Buscando referências...</p></div>';
             
-            const query = encodeURIComponent(`${termoSanitizado} tattoo`);
             const termo = termoSanitizado.toLowerCase();
             let imagens = [];
             
@@ -950,7 +898,6 @@
             `).join('');
         }
         
-        // Player
         function renderizarPlaylist() {
             const container = document.getElementById('playlistContainer');
             container.innerHTML = playlist.map((musica, i) => `
@@ -990,7 +937,7 @@
         }
         
         // ============================================================
-        // ADMIN - LOGIN COM SENHA SEGURA
+        // ADMIN
         // ============================================================
         
         async function mostrarLogin() {
@@ -1003,7 +950,7 @@
                             <input type="password" id="adminPassword" class="admin-input" placeholder="Senha do administrador">
                             <button class="booking-btn" onclick="fazerLogin()" style="width: 100%;">Entrar</button>
                             <div class="security-badge">
-                                <i class="fas fa-shield-alt"></i> Proteção contra XSS e SQL Injection
+                                <i class="fas fa-shield-alt"></i> Proteção contra XSS
                             </div>
                         ` : `
                             <h3>✏️ Editar Perfil</h3>
@@ -1082,12 +1029,10 @@
             const senhaAntiga = document.getElementById('oldPassword').value;
             const senhaNova = document.getElementById('newPassword').value;
             const confirmar = document.getElementById('confirmPassword').value;
-            
             if (senhaNova !== confirmar) {
                 alert('❌ As novas senhas não coincidem!');
                 return;
             }
-            
             const resultado = await trocarSenha(senhaAntiga, senhaNova);
             if (resultado.sucesso) {
                 alert('✅ ' + resultado.msg);
@@ -1126,7 +1071,6 @@
             profileData.stats.tattoos = sanitizar(document.getElementById('editTattoos').value);
             profileData.stats.years = sanitizar(document.getElementById('editYears').value);
             profileData.stats.satisfaction = sanitizar(document.getElementById('editSatisfaction').value);
-            
             salvarDados();
             renderizarSite();
             fecharAdminModal();
@@ -1153,7 +1097,6 @@
             document.body.appendChild(modal);
         }
         
-        // Chat com sanitização
         let mensagens = JSON.parse(localStorage.getItem('inkmaster_chat') || '[{"nome":"Lucas","mensagem":"Olá! 👋 Sou o Lucas. Como posso ajudar?","hora":"Agora","isUser":false}]');
         
         function carregarMensagens() {
@@ -1175,25 +1118,13 @@
             const input = document.getElementById('chatInput');
             const mensagem = sanitizar(input.value.trim());
             if (!mensagem) return;
-            
-            mensagens.push({
-                nome: 'Você',
-                mensagem: mensagem,
-                hora: new Date().toLocaleTimeString(),
-                isUser: true
-            });
+            mensagens.push({ nome: 'Você', mensagem: mensagem, hora: new Date().toLocaleTimeString(), isUser: true });
             localStorage.setItem('inkmaster_chat', JSON.stringify(mensagens));
             carregarMensagens();
             input.value = '';
-            
             setTimeout(() => {
                 const respostas = ["Obrigado! Me chama no WhatsApp para detalhes 📱", "Adorei! Vamos marcar uma consulta? 🖤", "Tenho disponibilidade essa semana!"];
-                mensagens.push({
-                    nome: 'Lucas',
-                    mensagem: respostas[Math.floor(Math.random() * respostas.length)],
-                    hora: new Date().toLocaleTimeString(),
-                    isUser: false
-                });
+                mensagens.push({ nome: 'Lucas', mensagem: respostas[Math.floor(Math.random() * respostas.length)], hora: new Date().toLocaleTimeString(), isUser: false });
                 localStorage.setItem('inkmaster_chat', JSON.stringify(mensagens));
                 carregarMensagens();
             }, 1000);
@@ -1217,7 +1148,7 @@
             document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
         }
         
-        // Expor funções
+        // EXPOR FUNÇÕES
         window.trocarFotoPerfil = trocarFotoPerfil;
         window.uploadArquivo = uploadArquivo;
         window.adicionarPorURL = adicionarPorURL;
@@ -1245,7 +1176,7 @@
         window.buscarPinterest = buscarPinterest;
         window.alterarSenha = alterarSenha;
         
-        // Iniciar
+        // INICIAR
         carregarDados();
     </script>
 </body>
