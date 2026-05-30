@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Studio Tattoo - Vitrine Profissional</title>
+    <title>Junior Tattoo - Estúdio de Tatuagem</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -121,7 +121,7 @@
 </head>
 <body>
     <div class="header">
-        <div class="logo" id="logoDisplay">TATTOO STUDIO</div>
+        <div class="logo" id="logoDisplay">JUNIOR TATTOO</div>
         <div>
             <button class="admin-btn" onclick="mostrarLogin()"><i class="fas fa-crown"></i> Admin</button>
             <div class="menu-icon" onclick="toggleMenu()"><i class="fas fa-bars"></i></div>
@@ -199,7 +199,7 @@
         <div class="chat-section" id="chat">
             <h2 class="section-title">💬 Chat com o Artista</h2>
             <div class="chat-container">
-                <div class="chat-header"><i class="fas fa-user-tie"></i> Artista - Online</div>
+                <div class="chat-header"><i class="fas fa-user-tie"></i> Junior Tattoo - Online</div>
                 <div class="chat-messages" id="chatMessages"></div>
                 <div class="chat-input-area">
                     <input type="text" class="chat-input" id="chatInput" placeholder="Digite sua mensagem..." onkeypress="handleKeyPress(event)">
@@ -213,50 +213,97 @@
 
     <script>
         // ============================================================
-        // CARREGAR E SALVAR DADOS - CORRIGIDO!
+        // CONFIGURAÇÕES INICIAIS
         // ============================================================
         
         let isAdminLogged = false;
         
-        // Dados padrão (só usados se não houver nada salvo)
-        const DADOS_PADRAO = {
-            profile: {
-                name: "Junior Tattoo",
-                title: "🎨 Tatuador Especialista em Realismo",
-                bio: "Especialista em realismo, aquarela e blackwork. Transformando ideias em arte na pele.",
-                avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop",
-                stats: { tattoos: "500+", years: "8", satisfaction: "100%" },
-                whatsapp: "5511999999999",
-                instagram: "https://instagram.com/junior_tattoo",
-                facebook: "https://facebook.com/junior_tattoo",
-                tiktok: "https://tiktok.com/@junior_tattoo"
-            },
-            fotos: [
+        // Dados que serão salvos
+        let profileData = {
+            name: "Junior Tattoo",
+            title: "🎨 Especialista em Realismo | Tatuador Profissional",
+            bio: "Especialista em realismo, aquarela e blackwork. 8 anos de experiência transformando ideias em arte na pele.",
+            avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop",
+            stats: { tattoos: "500+", years: "8", satisfaction: "100%" },
+            whatsapp: "5511999999999",
+            instagram: "https://instagram.com/junior_tattoo",
+            facebook: "https://facebook.com/junior_tattoo",
+            tiktok: "https://tiktok.com/@junior_tattoo"
+        };
+        
+        let fotos = [];
+        let videos = [];
+        let playlist = [];
+        
+        // ============================================================
+        // FUNÇÕES DE SALVAR E CARREGAR
+        // ============================================================
+        
+        function salvarTudo() {
+            const dadosCompletos = {
+                profile: profileData,
+                fotos: fotos,
+                videos: videos,
+                playlist: playlist,
+                dataSalvamento: new Date().toISOString()
+            };
+            localStorage.setItem('junior_tattoo_data', JSON.stringify(dadosCompletos));
+            console.log('💾 DADOS SALVOS!', {
+                nome: profileData.name,
+                whatsapp: profileData.whatsapp,
+                foto: profileData.avatar.substring(0, 50) + '...',
+                fotosCount: fotos.length,
+                videosCount: videos.length
+            });
+            return true;
+        }
+        
+        function carregarTudo() {
+            const salvos = localStorage.getItem('junior_tattoo_data');
+            if (salvos) {
+                try {
+                    const dados = JSON.parse(salvos);
+                    if (dados.profile) profileData = dados.profile;
+                    if (dados.fotos) fotos = dados.fotos;
+                    if (dados.videos) videos = dados.videos;
+                    if (dados.playlist) playlist = dados.playlist;
+                    console.log('📀 DADOS CARREGADOS!', {
+                        nome: profileData.name,
+                        whatsapp: profileData.whatsapp,
+                        dataSalvamento: dados.dataSalvamento
+                    });
+                    return true;
+                } catch(e) {
+                    console.log('Erro ao carregar dados');
+                }
+            }
+            
+            // Dados padrão se não houver nada salvo
+            fotos = [
                 { url: "https://images.unsplash.com/photo-1618457072880-a447c93f2edc?w=400&h=400&fit=crop", titulo: "Realismo Leão", tipo: "foto" },
                 { url: "https://images.unsplash.com/photo-1590247813693-5541d1c609fd?w=400&h=400&fit=crop", titulo: "Aquarela Flores", tipo: "foto" },
                 { url: "https://images.unsplash.com/photo-1607283105705-b083fd3e7a58?w=400&h=400&fit=crop", titulo: "Blackwork Geométrico", tipo: "foto" }
-            ],
-            videos: [
+            ];
+            videos = [
                 { url: "https://www.w3schools.com/html/mov_bbb.mp4", titulo: "Processo Tatuagem", tipo: "video" }
-            ],
-            playlist: [
+            ];
+            playlist = [
                 { nome: "🎸 Lo-fi Hip Hop", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
                 { nome: "🎵 Chill Beats", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" }
-            ]
-        };
+            ];
+            salvarTudo();
+            return false;
+        }
         
-        // Dados que serao salvos
-        let profileData = JSON.parse(JSON.stringify(DADOS_PADRAO.profile));
-        let fotos = JSON.parse(JSON.stringify(DADOS_PADRAO.fotos));
-        let videos = JSON.parse(JSON.stringify(DADOS_PADRAO.videos));
-        let playlist = JSON.parse(JSON.stringify(DADOS_PADRAO.playlist));
+        // ============================================================
+        // SEGURANÇA - SENHA
+        // ============================================================
         
-        // Senha
-        let senhaHash = localStorage.getItem('tattoo_password_hash');
+        let senhaHash = localStorage.getItem('junior_tattoo_password');
         
         async function hashSenha(senha) {
             const encoder = new TextEncoder();
-            const data = encoder.encode(senha + "tattoo_salt_2024");
+            const data = encoder.encode(senha + "junior_tattoo_salt");
             const hash = await crypto.subtle.digest('SHA-256', data);
             return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
@@ -264,7 +311,7 @@
         async function inicializarSenha() {
             if (!senhaHash) {
                 senhaHash = await hashSenha('admin123');
-                localStorage.setItem('tattoo_password_hash', senhaHash);
+                localStorage.setItem('junior_tattoo_password', senhaHash);
             }
         }
         
@@ -273,40 +320,10 @@
             return hash === senhaHash;
         }
         
-        // CARREGAR DADOS DO localStorage
-        function carregarDados() {
-            const saved = localStorage.getItem('tattoo_complete_data');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    if (data.profile) profileData = data.profile;
-                    if (data.fotos) fotos = data.fotos;
-                    if (data.videos) videos = data.videos;
-                    if (data.playlist) playlist = data.playlist;
-                    console.log('✅ Dados carregados do localStorage');
-                } catch(e) { 
-                    console.log('Erro ao carregar, usando dados padrão');
-                }
-            } else {
-                console.log('📦 Nenhum dado salvo, usando dados padrão');
-            }
-            inicializarSenha();
-            renderizarSite();
-        }
+        // ============================================================
+        // FUNÇÕES AUXILIARES
+        // ============================================================
         
-        // SALVAR DADOS no localStorage
-        function salvarDados() {
-            const dadosParaSalvar = {
-                profile: profileData,
-                fotos: fotos,
-                videos: videos,
-                playlist: playlist
-            };
-            localStorage.setItem('tattoo_complete_data', JSON.stringify(dadosParaSalvar));
-            console.log('💾 Dados salvos com sucesso!', profileData.name, profileData.whatsapp);
-        }
-        
-        // Funções auxiliares
         function sanitizar(texto) {
             if (!texto) return '';
             const div = document.createElement('div');
@@ -332,7 +349,10 @@
             });
         }
         
-        // Trocar foto do perfil (SALVA!)
+        // ============================================================
+        // TROCAR FOTO DO PERFIL - AGORA SALVA!
+        // ============================================================
+        
         function trocarFotoPerfil() {
             if (!isAdminLogged) {
                 alert('🔒 Faça login como administrador primeiro!');
@@ -346,15 +366,73 @@
             input.onchange = async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
+                
                 const base64 = await arquivoParaBase64(file);
                 profileData.avatar = base64;
-                salvarDados(); // SALVA!
+                salvarTudo(); // SALVA IMEDIATAMENTE
                 renderizarSite();
-                alert('✅ Foto de perfil atualizada e SALVA!');
-                if (isAdminLogged) mostrarLogin();
+                alert('✅ Foto de perfil atualizada e SALVA com sucesso!');
+                if (isAdminLogged) mostrarLogin(); // Atualiza o modal
             };
             input.click();
         }
+        
+        // ============================================================
+        // GERENCIAR MÍDIAS - AGORA SALVA!
+        // ============================================================
+        
+        function deletarMidia(tipo, index) {
+            if (!isAdminLogged) return;
+            if (confirm('Tem certeza que deseja excluir esta mídia?')) {
+                if (tipo === 'foto') {
+                    fotos.splice(index, 1);
+                } else {
+                    videos.splice(index, 1);
+                }
+                salvarTudo(); // SALVA IMEDIATAMENTE
+                renderizarGaleria();
+                if (isAdminLogged) mostrarLogin();
+                alert('✅ Mídia removida e SALVA!');
+            }
+        }
+        
+        function uploadArquivo(tipo) {
+            if (!isAdminLogged) return;
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = tipo === 'foto' ? 'image/*' : 'video/*';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const base64 = await arquivoParaBase64(file);
+                const titulo = prompt("Digite um título:", file.name.split('.')[0]);
+                if (titulo) {
+                    const novaMidia = { url: base64, titulo: sanitizar(titulo), tipo: tipo };
+                    if (tipo === 'foto') fotos.push(novaMidia);
+                    else videos.push(novaMidia);
+                    salvarTudo(); // SALVA IMEDIATAMENTE
+                    renderizarGaleria();
+                    alert('✅ Mídia adicionada e SALVA!');
+                }
+            };
+            input.click();
+        }
+        
+        function adicionarPorURL() {
+            if (!isAdminLogged) return;
+            const url = prompt("Cole a URL da imagem:");
+            const titulo = prompt("Título da imagem:");
+            if (url && titulo) {
+                fotos.push({ url: url, titulo: sanitizar(titulo), tipo: 'foto' });
+                salvarTudo(); // SALVA IMEDIATAMENTE
+                renderizarGaleria();
+                alert('✅ Imagem adicionada e SALVA!');
+            }
+        }
+        
+        // ============================================================
+        // RENDERIZAÇÃO
+        // ============================================================
         
         function renderizarSite() {
             document.getElementById('logoDisplay').innerHTML = sanitizar(profileData.name.split(' ')[0]);
@@ -390,57 +468,10 @@
             `).join('');
         }
         
-        // Edição de mídia (SALVA!)
-        function deletarMidia(tipo, index) {
-            if (!isAdminLogged) return;
-            if (confirm('Tem certeza que deseja excluir esta mídia?')) {
-                if (tipo === 'foto') {
-                    fotos.splice(index, 1);
-                } else {
-                    videos.splice(index, 1);
-                }
-                salvarDados(); // SALVA!
-                renderizarGaleria();
-                if (isAdminLogged) mostrarLogin();
-                alert('✅ Mídia removida e SALVA!');
-            }
-        }
+        // ============================================================
+        // PLAYLIST
+        // ============================================================
         
-        function uploadArquivo(tipo) {
-            if (!isAdminLogged) return;
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = tipo === 'foto' ? 'image/*' : 'video/*';
-            input.onchange = async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const base64 = await arquivoParaBase64(file);
-                const titulo = prompt("Digite um título:", file.name.split('.')[0]);
-                if (titulo) {
-                    const novaMidia = { url: base64, titulo: sanitizar(titulo), tipo: tipo };
-                    if (tipo === 'foto') fotos.push(novaMidia);
-                    else videos.push(novaMidia);
-                    salvarDados(); // SALVA!
-                    renderizarGaleria();
-                    alert('✅ Mídia adicionada e SALVA!');
-                }
-            };
-            input.click();
-        }
-        
-        function adicionarPorURL() {
-            if (!isAdminLogged) return;
-            const url = prompt("Cole a URL da imagem:");
-            const titulo = prompt("Título da imagem:");
-            if (url && titulo) {
-                fotos.push({ url: url, titulo: sanitizar(titulo), tipo: 'foto' });
-                salvarDados(); // SALVA!
-                renderizarGaleria();
-                alert('✅ Imagem adicionada e SALVA!');
-            }
-        }
-        
-        // Playlist
         function renderizarPlaylist() {
             const container = document.getElementById('playlistContainer');
             container.innerHTML = playlist.map((musica, i) => `
@@ -466,7 +497,7 @@
             const nome = prompt("Nome da música:");
             if (url && nome) {
                 playlist.push({ nome: sanitizar(nome), url: url });
-                salvarDados(); // SALVA!
+                salvarTudo();
                 renderizarPlaylist();
                 alert('✅ Música adicionada e SALVA!');
             }
@@ -480,7 +511,10 @@
             document.getElementById('playerModal').classList.toggle('active');
         }
         
-        // ADMIN
+        // ============================================================
+        // ADMIN - PAINEL DE CONTROLE
+        // ============================================================
+        
         async function mostrarLogin() {
             const modal = document.getElementById('adminModal');
             modal.innerHTML = `
@@ -514,17 +548,17 @@
                             <button class="admin-btn" onclick="alterarSenha()" style="background: #d4af37; color: #000; width: 100%;">Alterar Senha</button>
                             
                             <h3 style="margin-top: 20px;">📸 Gerenciar Mídias</h3>
-                            <div class="upload-area" onclick="uploadArquivo('foto')"><i class="fas fa-camera" style="font-size: 40px;"></i><p>📷 Adicionar FOTO (da galeria)</p></div>
+                            <div class="upload-area" onclick="uploadArquivo('foto')"><i class="fas fa-camera" style="font-size: 40px;"></i><p>📷 Adicionar FOTO da galeria</p></div>
                             <div class="upload-area" onclick="uploadArquivo('video')"><i class="fas fa-video" style="font-size: 40px;"></i><p>🎬 Adicionar VÍDEO</p></div>
                             <div class="upload-area" onclick="adicionarPorURL()"><i class="fas fa-link" style="font-size: 40px;"></i><p>🔗 Adicionar por URL</p></div>
                             
-                            <h3>🖼️ Suas Mídias (${fotos.length + videos.length})</h3>
+                            <h3>🖼️ Suas Mídias (${fotos.length} fotos, ${videos.length} vídeos)</h3>
                             <div class="media-preview-grid">
                                 ${fotos.map((f, i) => `<div class="preview-item"><img src="${f.url}"><button onclick="deletarMidia('foto', ${i})"><i class="fas fa-trash"></i></button></div>`).join('')}
                                 ${videos.map((v, i) => `<div class="preview-item"><video src="${v.url}"></video><button onclick="deletarMidia('video', ${i})"><i class="fas fa-trash"></i></button></div>`).join('')}
                             </div>
                             
-                            <button class="booking-btn" onclick="salvarEdicoes()" style="background: #28a745;">💾 SALVAR ALTERAÇÕES</button>
+                            <button class="booking-btn" onclick="salvarEdicoes()" style="background: #28a745;">💾 SALVAR TODAS ALTERAÇÕES</button>
                             <button class="admin-btn" onclick="logout()" style="background: #dc3545; color: white; margin-top: 10px;">🚪 Sair</button>
                         `}
                         <button class="admin-btn" onclick="fecharAdminModal()" style="margin-top: 15px;">Fechar</button>
@@ -559,7 +593,7 @@
                 return;
             }
             senhaHash = await hashSenha(senhaNova);
-            localStorage.setItem('tattoo_password_hash', senhaHash);
+            localStorage.setItem('junior_tattoo_password', senhaHash);
             alert('✅ Senha alterada com sucesso!');
         }
         
@@ -582,14 +616,14 @@
             profileData.stats.years = sanitizar(novosAnos);
             profileData.stats.satisfaction = sanitizar(novaSatisfacao);
             
-            // SALVAR!
-            salvarDados();
+            // SALVAR TUDO!
+            salvarTudo();
             
             // Atualizar a tela
             renderizarSite();
             fecharAdminModal();
             
-            alert('✅ Perfil atualizado e SALVO com sucesso!\n\n' +
+            alert('✅ PERFIL SALVO COM SUCESSO!\n\n' +
                   '📌 Nome: ' + profileData.name + '\n' +
                   '📌 WhatsApp: ' + profileData.whatsapp);
         }
@@ -603,7 +637,10 @@
             document.getElementById('adminModal').style.display = 'none';
         }
         
-        // Funções do site
+        // ============================================================
+        // FUNÇÕES DO SITE - CLIENTE
+        // ============================================================
+        
         function abrirMedia(url, tipo) {
             const modal = document.createElement('div');
             modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:3000;display:flex;align-items:center;justify-content:center';
@@ -617,14 +654,14 @@
         }
         
         // Chat
-        let mensagens = JSON.parse(localStorage.getItem('tattoo_chat') || '[{"nome":"Artista","mensagem":"Olá! 👋 Como posso ajudar?","hora":"Agora","isUser":false}]');
+        let mensagens = JSON.parse(localStorage.getItem('junior_tattoo_chat') || '[{"nome":"Junior","mensagem":"Olá! 👋 Seja bem-vindo ao meu estúdio. Como posso ajudar?","hora":"Agora","isUser":false}]');
         
         function carregarMensagens() {
             const container = document.getElementById('chatMessages');
             if (!container) return;
             container.innerHTML = mensagens.map(msg => `
                 <div class="message ${msg.isUser ? 'user' : ''}">
-                    <div class="message-avatar">${msg.isUser ? 'V' : 'A'}</div>
+                    <div class="message-avatar">${msg.isUser ? 'V' : 'J'}</div>
                     <div class="message-bubble">
                         ${sanitizar(msg.mensagem)}
                         <div class="message-time">${sanitizar(msg.hora)}</div>
@@ -639,13 +676,13 @@
             const mensagem = sanitizar(input.value.trim());
             if (!mensagem) return;
             mensagens.push({ nome: 'Você', mensagem: mensagem, hora: new Date().toLocaleTimeString(), isUser: true });
-            localStorage.setItem('tattoo_chat', JSON.stringify(mensagens));
+            localStorage.setItem('junior_tattoo_chat', JSON.stringify(mensagens));
             carregarMensagens();
             input.value = '';
             setTimeout(() => {
-                const respostas = ["Obrigado! Me chama no WhatsApp 📱", "Adorei! Vamos marcar? 🖤", "Tenho disponibilidade!"];
-                mensagens.push({ nome: 'Artista', mensagem: respostas[Math.floor(Math.random() * respostas.length)], hora: new Date().toLocaleTimeString(), isUser: false });
-                localStorage.setItem('tattoo_chat', JSON.stringify(mensagens));
+                const respostas = ["Obrigado! Me chama no WhatsApp para mais detalhes 📱", "Adorei a ideia! Vamos marcar uma consulta? 🖤", "Tenho disponibilidade essa semana!"];
+                mensagens.push({ nome: 'Junior', mensagem: respostas[Math.floor(Math.random() * respostas.length)], hora: new Date().toLocaleTimeString(), isUser: false });
+                localStorage.setItem('junior_tattoo_chat', JSON.stringify(mensagens));
                 carregarMensagens();
             }, 1000);
         }
@@ -690,7 +727,10 @@
             document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
         }
         
-        // EXPOR FUNÇÕES
+        // ============================================================
+        // EXPOR FUNÇÕES GLOBAIS
+        // ============================================================
+        
         window.trocarFotoPerfil = trocarFotoPerfil;
         window.uploadArquivo = uploadArquivo;
         window.adicionarPorURL = adicionarPorURL;
@@ -717,8 +757,19 @@
         window.buscarPinterest = buscarPinterest;
         window.alterarSenha = alterarSenha;
         
+        // ============================================================
         // INICIAR
-        carregarDados();
+        // ============================================================
+        
+        async function iniciar() {
+            await inicializarSenha();
+            carregarTudo();
+            renderizarSite();
+            console.log('🚀 Site iniciado! Use Admin/senha: admin123');
+            console.log('📌 Dados salvos no localStorage com a chave: junior_tattoo_data');
+        }
+        
+        iniciar();
     </script>
 </body>
 </html>
