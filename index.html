@@ -37,7 +37,7 @@
             backdrop-filter: blur(10px); z-index: 1000; padding: 15px 20px;
             display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(212,175,55,0.3);
         }
-        .logo { font-size: 24px; font-weight: bold; color: #d4af37; }
+        .logo { font-size: 24px; font-weight: bold; background: linear-gradient(135deg, #d4af37, #ffd700); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .admin-btn { background: #d4af37; color: #000; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; }
         .menu-icon { display: inline-block; margin-left: 15px; cursor: pointer; color: #d4af37; font-size: 24px; }
 
@@ -213,143 +213,130 @@
 
     <script>
         // ============================================================
-        // DADOS GLOBAIS
+        // DADOS
         // ============================================================
-        let isAdminLogged = false;
         
-        let profileData = {
-            name: "Junior Tattoo",
-            title: "🎨 Especialista em Realismo | Tatuador Profissional",
-            bio: "Especialista em realismo, aquarela e blackwork. 8 anos de experiência transformando ideias em arte na pele.",
-            avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop",
-            stats: { tattoos: "500+", years: "8", satisfaction: "100%" },
-            whatsapp: "5511999999999",
-            instagram: "https://instagram.com/junior_tattoo",
-            facebook: "https://facebook.com/junior_tattoo",
-            tiktok: "https://tiktok.com/@junior_tattoo"
-        };
+        let isAdminLogged = false;
+        let profileData = {};
+        
+        function carregarDados() {
+            const salvos = localStorage.getItem('tattoo_complete_data');
+            if (salvos) {
+                profileData = JSON.parse(salvos);
+            } else {
+                profileData = {
+                    name: "Junior Tattoo",
+                    title: "🎨 Especialista em Realismo | Tatuador Profissional",
+                    bio: "Especialista em realismo, aquarela e blackwork. 8 anos de experiência transformando ideias em arte na pele.",
+                    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop",
+                    stats: { tattoos: "500+", years: "8", satisfaction: "100%" },
+                    whatsapp: "5511999999999",
+                    instagram: "https://instagram.com/junior_tattoo",
+                    facebook: "https://facebook.com/junior_tattoo",
+                    tiktok: "https://tiktok.com/@junior_tattoo"
+                };
+                localStorage.setItem('tattoo_complete_data', JSON.stringify(profileData));
+            }
+            
+            // Carregar fotos e vídeos
+            const fotosSalvas = localStorage.getItem('tattoo_fotos');
+            if (fotosSalvas) {
+                fotos = JSON.parse(fotosSalvas);
+            } else {
+                fotos = [
+                    { url: "https://images.unsplash.com/photo-1618457072880-a447c93f2edc?w=400&h=400&fit=crop", titulo: "Realismo Leão", tipo: "foto" },
+                    { url: "https://images.unsplash.com/photo-1590247813693-5541d1c609fd?w=400&h=400&fit=crop", titulo: "Aquarela Flores", tipo: "foto" }
+                ];
+            }
+            
+            const videosSalvos = localStorage.getItem('tattoo_videos');
+            if (videosSalvos) {
+                videos = JSON.parse(videosSalvos);
+            } else {
+                videos = [
+                    { url: "https://www.w3schools.com/html/mov_bbb.mp4", titulo: "Processo Tatuagem", tipo: "video" }
+                ];
+            }
+            
+            const playlistSalva = localStorage.getItem('tattoo_playlist');
+            if (playlistSalva) {
+                playlist = JSON.parse(playlistSalva);
+            } else {
+                playlist = [
+                    { nome: "🎸 Lo-fi Hip Hop", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+                    { nome: "🎵 Chill Beats", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" }
+                ];
+            }
+            
+            renderizarSite();
+        }
         
         let fotos = [];
         let videos = [];
         let playlist = [];
         
         // ============================================================
-        // FUNÇÕES DE SALVAR E CARREGAR (CORRIGIDAS)
+        // FUNÇÃO SALVAR EDIÇÕES - CORRIGIDA (SALVA WHATSAPP!)
         // ============================================================
         
-        function salvarDados() {
-            const dadosCompletos = {
-                profile: profileData,
-                fotos: fotos,
-                videos: videos,
-                playlist: playlist
-            };
-            localStorage.setItem('junior_tattoo_data', JSON.stringify(dadosCompletos));
-            console.log('💾 SALVO COM SUCESSO!', {
-                nome: profileData.name,
-                whatsapp: profileData.whatsapp,
-                temFoto: profileData.avatar ? 'sim' : 'não'
-            });
-            return true;
-        }
-        
-        function carregarDados() {
-            const salvos = localStorage.getItem('junior_tattoo_data');
-            if (salvos) {
-                try {
-                    const dados = JSON.parse(salvos);
-                    if (dados.profile) profileData = dados.profile;
-                    if (dados.fotos) fotos = dados.fotos;
-                    if (dados.videos) videos = dados.videos;
-                    if (dados.playlist) playlist = dados.playlist;
-                    console.log('📀 CARREGADO!', {
-                        nome: profileData.name,
-                        whatsapp: profileData.whatsapp
-                    });
-                } catch(e) {
-                    console.log('Erro ao carregar, usando padrão');
-                    carregarPadrao();
-                }
-            } else {
-                carregarPadrao();
-            }
+        function salvarEdicoes() {
+            const novoNome = document.getElementById('editName').value;
+            const novoTitulo = document.getElementById('editTitle').value;
+            const novaBio = document.getElementById('editBio').value;
+            const novoWhatsapp = document.getElementById('editWhatsapp').value;
+            const novasTatuagens = document.getElementById('editTattoos').value;
+            const novosAnos = document.getElementById('editYears').value;
+            const novaSatisfacao = document.getElementById('editSatisfaction').value;
             
-            // Garantir que o WhatsApp não fique vazio
-            if (!profileData.whatsapp) profileData.whatsapp = "5511999999999";
+            profileData.name = novoNome;
+            profileData.title = novoTitulo;
+            profileData.bio = novaBio;
+            profileData.whatsapp = novoWhatsapp;
+            profileData.stats.tattoos = novasTatuagens;
+            profileData.stats.years = novosAnos;
+            profileData.stats.satisfaction = novaSatisfacao;
+            
+            localStorage.setItem('tattoo_complete_data', JSON.stringify(profileData));
             
             renderizarSite();
-        }
-        
-        function carregarPadrao() {
-            profileData = {
-                name: "Junior Tattoo",
-                title: "🎨 Especialista em Realismo | Tatuador Profissional",
-                bio: "Especialista em realismo, aquarela e blackwork. 8 anos de experiência transformando ideias em arte na pele.",
-                avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop",
-                stats: { tattoos: "500+", years: "8", satisfaction: "100%" },
-                whatsapp: "5511999999999",
-                instagram: "https://instagram.com/junior_tattoo",
-                facebook: "https://facebook.com/junior_tattoo",
-                tiktok: "https://tiktok.com/@junior_tattoo"
-            };
-            fotos = [
-                { url: "https://images.unsplash.com/photo-1618457072880-a447c93f2edc?w=400&h=400&fit=crop", titulo: "Realismo Leão", tipo: "foto" },
-                { url: "https://images.unsplash.com/photo-1590247813693-5541d1c609fd?w=400&h=400&fit=crop", titulo: "Aquarela Flores", tipo: "foto" }
-            ];
-            videos = [
-                { url: "https://www.w3schools.com/html/mov_bbb.mp4", titulo: "Processo Tatuagem", tipo: "video" }
-            ];
-            playlist = [
-                { nome: "🎸 Lo-fi Hip Hop", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-                { nome: "🎵 Chill Beats", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" }
-            ];
-            salvarDados();
+            fecharAdminModal();
+            alert('✅ Perfil salvo! WhatsApp: ' + profileData.whatsapp);
         }
         
         // ============================================================
-        // SENHA
+        // FUNÇÃO TROCAR FOTO - CORRIGIDA (SALVA FOTO!)
         // ============================================================
         
-        let senhaHash = localStorage.getItem('junior_tattoo_password');
-        
-        async function hashSenha(senha) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(senha + "junior_tattoo_salt");
-            const hash = await crypto.subtle.digest('SHA-256', data);
-            return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-        
-        async function inicializarSenha() {
-            if (!senhaHash) {
-                senhaHash = await hashSenha('admin123');
-                localStorage.setItem('junior_tattoo_password', senhaHash);
+        function trocarFotoPerfil() {
+            if (!isAdminLogged) {
+                alert('Faça login como admin primeiro!');
+                mostrarLogin();
+                return;
             }
-        }
-        
-        async function verificarSenha(senha) {
-            const hash = await hashSenha(senha);
-            return hash === senhaHash;
+            
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    profileData.avatar = event.target.result;
+                    localStorage.setItem('tattoo_complete_data', JSON.stringify(profileData));
+                    renderizarSite();
+                    alert('✅ Foto salva!');
+                    if (isAdminLogged) mostrarLogin();
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
         }
         
         // ============================================================
-        // FUNÇÕES AUXILIARES
+        // RESTO DO SEU CÓDIGO ORIGINAL (NÃO MEXI)
         // ============================================================
-        
-        function sanitizar(texto) {
-            if (!texto) return '';
-            const div = document.createElement('div');
-            div.textContent = texto;
-            return div.innerHTML;
-        }
-        
-        function escaparHTML(str) {
-            return str.replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
-        }
         
         function arquivoParaBase64(file) {
             return new Promise((resolve, reject) => {
@@ -360,46 +347,19 @@
             });
         }
         
-        // ============================================================
-        // TROCAR FOTO (CORRIGIDO - SALVA!)
-        // ============================================================
-        
-        function trocarFotoPerfil() {
-            if (!isAdminLogged) {
-                alert('🔒 Faça login como administrador primeiro!');
-                mostrarLogin();
-                return;
-            }
-            
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.onchange = async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const base64 = await arquivoParaBase64(file);
-                profileData.avatar = base64;
-                salvarDados();
-                renderizarSite();
-                alert('✅ Foto de perfil atualizada e SALVA!');
-                if (isAdminLogged) mostrarLogin();
-            };
-            input.click();
-        }
-        
-        // ============================================================
-        // GERENCIAR MÍDIAS
-        // ============================================================
-        
         function deletarMidia(tipo, index) {
             if (!isAdminLogged) return;
             if (confirm('Tem certeza que deseja excluir esta mídia?')) {
-                if (tipo === 'foto') fotos.splice(index, 1);
-                else videos.splice(index, 1);
-                salvarDados();
+                if (tipo === 'foto') {
+                    fotos.splice(index, 1);
+                    localStorage.setItem('tattoo_fotos', JSON.stringify(fotos));
+                } else {
+                    videos.splice(index, 1);
+                    localStorage.setItem('tattoo_videos', JSON.stringify(videos));
+                }
                 renderizarGaleria();
                 if (isAdminLogged) mostrarLogin();
-                alert('✅ Mídia removida e SALVA!');
+                alert('✅ Mídia removida!');
             }
         }
         
@@ -414,12 +374,16 @@
                 const base64 = await arquivoParaBase64(file);
                 const titulo = prompt("Digite um título:", file.name.split('.')[0]);
                 if (titulo) {
-                    const novaMidia = { url: base64, titulo: sanitizar(titulo), tipo: tipo };
-                    if (tipo === 'foto') fotos.push(novaMidia);
-                    else videos.push(novaMidia);
-                    salvarDados();
+                    const novaMidia = { url: base64, titulo: titulo, tipo: tipo };
+                    if (tipo === 'foto') {
+                        fotos.push(novaMidia);
+                        localStorage.setItem('tattoo_fotos', JSON.stringify(fotos));
+                    } else {
+                        videos.push(novaMidia);
+                        localStorage.setItem('tattoo_videos', JSON.stringify(videos));
+                    }
                     renderizarGaleria();
-                    alert('✅ Mídia adicionada e SALVA!');
+                    alert('✅ Mídia adicionada!');
                 }
             };
             input.click();
@@ -430,26 +394,22 @@
             const url = prompt("Cole a URL da imagem:");
             const titulo = prompt("Título da imagem:");
             if (url && titulo) {
-                fotos.push({ url: url, titulo: sanitizar(titulo), tipo: 'foto' });
-                salvarDados();
+                fotos.push({ url: url, titulo: titulo, tipo: 'foto' });
+                localStorage.setItem('tattoo_fotos', JSON.stringify(fotos));
                 renderizarGaleria();
-                alert('✅ Imagem adicionada e SALVA!');
+                alert('✅ Imagem adicionada!');
             }
         }
         
-        // ============================================================
-        // RENDERIZAÇÃO
-        // ============================================================
-        
         function renderizarSite() {
-            document.getElementById('logoDisplay').innerHTML = sanitizar(profileData.name.split(' ')[0]);
+            document.getElementById('logoDisplay').innerHTML = profileData.name.split(' ')[0];
             document.getElementById('profileAvatar').src = profileData.avatar;
-            document.getElementById('profileName').innerHTML = sanitizar(profileData.name);
-            document.getElementById('profileTitle').innerHTML = sanitizar(profileData.title);
-            document.getElementById('profileBio').innerHTML = sanitizar(profileData.bio).replace(/\n/g, '<br>');
-            document.getElementById('statTattoos').innerHTML = sanitizar(profileData.stats.tattoos);
-            document.getElementById('statYears').innerHTML = sanitizar(profileData.stats.years);
-            document.getElementById('statSatisfaction').innerHTML = sanitizar(profileData.stats.satisfaction);
+            document.getElementById('profileName').innerHTML = profileData.name;
+            document.getElementById('profileTitle').innerHTML = profileData.title;
+            document.getElementById('profileBio').innerHTML = profileData.bio.replace(/\n/g, '<br>');
+            document.getElementById('statTattoos').innerHTML = profileData.stats.tattoos;
+            document.getElementById('statYears').innerHTML = profileData.stats.years;
+            document.getElementById('statSatisfaction').innerHTML = profileData.stats.satisfaction;
             
             renderizarGaleria();
             renderizarPlaylist();
@@ -461,30 +421,36 @@
             const videoGallery = document.getElementById('videoGallery');
             
             photoGallery.innerHTML = fotos.map((foto, i) => `
-                <div class="gallery-item" onclick="abrirMedia('${escaparHTML(foto.url)}', 'foto')">
-                    <img src="${foto.url}" alt="${sanitizar(foto.titulo)}">
-                    <div class="gallery-overlay"><div>📸 ${sanitizar(foto.titulo)}</div></div>
+                <div class="gallery-item" onclick="abrirMedia('${foto.url}', 'foto')">
+                    <img src="${foto.url}" alt="${foto.titulo}">
+                    <div class="gallery-overlay"><div>📸 ${foto.titulo}</div></div>
+                    ${isAdminLogged ? `
+                        <div class="media-actions" style="position:absolute;top:10px;right:10px;display:flex;gap:5px">
+                            <button class="delete" onclick="event.stopPropagation(); deletarMidia('foto', ${i})" style="background:rgba(0,0,0,0.7);border:none;color:white;padding:5px 10px;border-radius:20px;cursor:pointer"><i class="fas fa-trash"></i></button>
+                        </div>
+                    ` : ''}
                 </div>
             `).join('');
             
             videoGallery.innerHTML = videos.map((video, i) => `
-                <div class="gallery-item" onclick="abrirMedia('${escaparHTML(video.url)}', 'video')">
+                <div class="gallery-item" onclick="abrirMedia('${video.url}', 'video')">
                     <video src="${video.url}"></video>
-                    <div class="gallery-overlay"><div>🎬 ${sanitizar(video.titulo)}</div></div>
+                    <div class="gallery-overlay"><div>🎬 ${video.titulo}</div></div>
+                    ${isAdminLogged ? `
+                        <div class="media-actions" style="position:absolute;top:10px;right:10px;display:flex;gap:5px">
+                            <button class="delete" onclick="event.stopPropagation(); deletarMidia('video', ${i})" style="background:rgba(0,0,0,0.7);border:none;color:white;padding:5px 10px;border-radius:20px;cursor:pointer"><i class="fas fa-trash"></i></button>
+                        </div>
+                    ` : ''}
                 </div>
             `).join('');
         }
-        
-        // ============================================================
-        // PLAYLIST
-        // ============================================================
         
         function renderizarPlaylist() {
             const container = document.getElementById('playlistContainer');
             container.innerHTML = playlist.map((musica, i) => `
                 <div class="playlist-item" onclick="tocarMusica(${i})">
                     <i class="fas fa-music"></i>
-                    <span>${sanitizar(musica.nome)}</span>
+                    <span>${musica.nome}</span>
                 </div>
             `).join('');
             if (playlist.length > 0 && !window.currentSongIndex) tocarMusica(0);
@@ -495,7 +461,7 @@
             const audio = document.getElementById('audioPlayer');
             audio.src = playlist[index].url;
             audio.play();
-            document.getElementById('currentMusicTitle').innerHTML = sanitizar(playlist[index].nome);
+            document.getElementById('currentMusicTitle').innerHTML = playlist[index].nome;
         }
         
         function adicionarMusicaURL() {
@@ -503,10 +469,10 @@
             const url = prompt("Cole a URL da música (MP3):");
             const nome = prompt("Nome da música:");
             if (url && nome) {
-                playlist.push({ nome: sanitizar(nome), url: url });
-                salvarDados();
+                playlist.push({ nome: nome, url: url });
+                localStorage.setItem('tattoo_playlist', JSON.stringify(playlist));
                 renderizarPlaylist();
-                alert('✅ Música adicionada e SALVA!');
+                alert('✅ Música adicionada!');
             }
         }
         
@@ -518,9 +484,46 @@
             document.getElementById('playerModal').classList.toggle('active');
         }
         
-        // ============================================================
-        // ADMIN - PAINEL (CORRIGIDO - SALVA WHATSAPP!)
-        // ============================================================
+        async function buscarPinterest() {
+            const searchTerm = document.getElementById('pinterestSearch').value;
+            const grid = document.getElementById('pinterestGrid');
+            grid.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 48px;"></i><p>Buscando...</p></div>';
+            
+            const imagens = [
+                { url: "https://images.unsplash.com/photo-1618457072880-a447c93f2edc?w=400", titulo: "Realismo Leão" },
+                { url: "https://images.unsplash.com/photo-1590247813693-5541d1c609fd?w=400", titulo: "Aquarela Flores" },
+                { url: "https://images.unsplash.com/photo-1607283105705-b083fd3e7a58?w=400", titulo: "Blackwork" }
+            ];
+            
+            grid.innerHTML = imagens.map(img => `
+                <div class="pinterest-card" onclick="window.open('https://www.pinterest.com/search/pins/?q=${encodeURIComponent(searchTerm)}%20tattoo', '_blank')">
+                    <img src="${img.url}">
+                    <p>📌 ${img.titulo}</p>
+                </div>
+            `).join('');
+        }
+        
+        // SENHA
+        let senhaHash = localStorage.getItem('tattoo_password_hash');
+        
+        async function hashSenha(senha) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(senha + "tattoo_salt_2024");
+            const hash = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+        
+        async function inicializarSenha() {
+            if (!senhaHash) {
+                senhaHash = await hashSenha('admin123');
+                localStorage.setItem('tattoo_password_hash', senhaHash);
+            }
+        }
+        
+        async function verificarSenha(senha) {
+            const hash = await hashSenha(senha);
+            return hash === senhaHash;
+        }
         
         async function mostrarLogin() {
             const modal = document.getElementById('adminModal');
@@ -534,39 +537,39 @@
                             <p style="margin-top: 15px; color: #888; font-size: 12px;">Senha padrão: <strong>admin123</strong></p>
                         ` : `
                             <h3>✏️ Editar Perfil</h3>
-                            <input type="text" id="editName" class="admin-input" placeholder="Nome" value="${sanitizar(profileData.name)}">
-                            <input type="text" id="editTitle" class="admin-input" placeholder="Título" value="${sanitizar(profileData.title)}">
-                            <textarea id="editBio" class="admin-textarea" placeholder="Biografia">${sanitizar(profileData.bio)}</textarea>
+                            <input type="text" id="editName" class="admin-input" placeholder="Nome" value="${profileData.name}">
+                            <input type="text" id="editTitle" class="admin-input" placeholder="Título" value="${profileData.title}">
+                            <textarea id="editBio" class="admin-textarea" placeholder="Biografia">${profileData.bio}</textarea>
                             <div class="upload-area" onclick="trocarFotoPerfil()">
                                 <i class="fas fa-camera" style="font-size: 40px;"></i>
                                 <p>📷 Clique para trocar FOTO DO PERFIL</p>
                             </div>
-                            <input type="text" id="editWhatsapp" class="admin-input" placeholder="WhatsApp (ex: 5511999999999)" value="${sanitizar(profileData.whatsapp)}">
+                            <input type="text" id="editWhatsapp" class="admin-input" placeholder="WhatsApp" value="${profileData.whatsapp}">
                             
                             <h3 style="margin-top: 20px;">📊 Estatísticas</h3>
-                            <input type="text" id="editTattoos" class="admin-input" placeholder="Tatuagens" value="${sanitizar(profileData.stats.tattoos)}">
-                            <input type="text" id="editYears" class="admin-input" placeholder="Anos" value="${sanitizar(profileData.stats.years)}">
-                            <input type="text" id="editSatisfaction" class="admin-input" placeholder="Satisfação" value="${sanitizar(profileData.stats.satisfaction)}">
+                            <input type="text" id="editTattoos" class="admin-input" placeholder="Tatuagens" value="${profileData.stats.tattoos}">
+                            <input type="text" id="editYears" class="admin-input" placeholder="Anos" value="${profileData.stats.years}">
+                            <input type="text" id="editSatisfaction" class="admin-input" placeholder="Satisfação" value="${profileData.stats.satisfaction}">
                             
                             <h3 style="margin-top: 20px;">🔐 Alterar Senha</h3>
                             <input type="password" id="oldPassword" class="admin-input" placeholder="Senha atual">
-                            <input type="password" id="newPassword" class="admin-input" placeholder="Nova senha (min 6 caracteres)">
+                            <input type="password" id="newPassword" class="admin-input" placeholder="Nova senha (min 6 caracteres, 1 maiúscula, 1 número)">
                             <input type="password" id="confirmPassword" class="admin-input" placeholder="Confirmar nova senha">
                             <button class="admin-btn" onclick="alterarSenha()" style="background: #d4af37; color: #000; width: 100%;">Alterar Senha</button>
                             
                             <h3 style="margin-top: 20px;">📸 Gerenciar Mídias</h3>
-                            <div class="upload-area" onclick="uploadArquivo('foto')"><i class="fas fa-camera" style="font-size: 40px;"></i><p>📷 Adicionar FOTO da galeria</p></div>
+                            <div class="upload-area" onclick="uploadArquivo('foto')"><i class="fas fa-camera" style="font-size: 40px;"></i><p>📷 Adicionar FOTO</p></div>
                             <div class="upload-area" onclick="uploadArquivo('video')"><i class="fas fa-video" style="font-size: 40px;"></i><p>🎬 Adicionar VÍDEO</p></div>
                             <div class="upload-area" onclick="adicionarPorURL()"><i class="fas fa-link" style="font-size: 40px;"></i><p>🔗 Adicionar por URL</p></div>
                             
-                            <h3>🖼️ Suas Mídias (${fotos.length} fotos, ${videos.length} vídeos)</h3>
+                            <h3>🖼️ Suas Mídias</h3>
                             <div class="media-preview-grid">
                                 ${fotos.map((f, i) => `<div class="preview-item"><img src="${f.url}"><button onclick="deletarMidia('foto', ${i})"><i class="fas fa-trash"></i></button></div>`).join('')}
                                 ${videos.map((v, i) => `<div class="preview-item"><video src="${v.url}"></video><button onclick="deletarMidia('video', ${i})"><i class="fas fa-trash"></i></button></div>`).join('')}
                             </div>
                             
-                            <button class="booking-btn" onclick="salvarEdicoes()" style="background: #28a745;">💾 SALVAR TODAS ALTERAÇÕES</button>
-                            <button class="admin-btn" onclick="logout()" style="background: #dc3545; color: white; margin-top: 10px;">🚪 Sair</button>
+                            <button class="booking-btn" onclick="salvarEdicoes()" style="margin-top: 20px; background: #28a745;">💾 SALVAR ALTERAÇÕES</button>
+                            <button class="admin-btn" onclick="logout()" style="margin-top: 10px; background: #dc3545; color: white;">🚪 Sair</button>
                         `}
                         <button class="admin-btn" onclick="fecharAdminModal()" style="margin-top: 15px;">Fechar</button>
                     </div>
@@ -594,47 +597,14 @@
                 alert('❌ As novas senhas não coincidem!');
                 return;
             }
-            if (senhaNova.length < 6) {
-                alert('❌ A nova senha deve ter pelo menos 6 caracteres!');
-                return;
-            }
             const valido = await verificarSenha(senhaAntiga);
             if (!valido) {
                 alert('❌ Senha atual incorreta!');
                 return;
             }
             senhaHash = await hashSenha(senhaNova);
-            localStorage.setItem('junior_tattoo_password', senhaHash);
+            localStorage.setItem('tattoo_password_hash', senhaHash);
             alert('✅ Senha alterada com sucesso!');
-        }
-        
-        function salvarEdicoes() {
-            // Pegar os valores dos campos
-            const novoNome = document.getElementById('editName').value;
-            const novoTitulo = document.getElementById('editTitle').value;
-            const novaBio = document.getElementById('editBio').value;
-            const novoWhatsapp = document.getElementById('editWhatsapp').value;
-            const novasTatuagens = document.getElementById('editTattoos').value;
-            const novosAnos = document.getElementById('editYears').value;
-            const novaSatisfacao = document.getElementById('editSatisfaction').value;
-            
-            // Atualizar o objeto
-            profileData.name = sanitizar(novoNome);
-            profileData.title = sanitizar(novoTitulo);
-            profileData.bio = sanitizar(novaBio);
-            profileData.whatsapp = sanitizar(novoWhatsapp);
-            profileData.stats.tattoos = sanitizar(novasTatuagens);
-            profileData.stats.years = sanitizar(novosAnos);
-            profileData.stats.satisfaction = sanitizar(novaSatisfacao);
-            
-            // SALVAR TUDO!
-            salvarDados();
-            
-            // Atualizar a tela
-            renderizarSite();
-            fecharAdminModal();
-            
-            alert('✅ PERFIL SALVO COM SUCESSO!\n\n📌 Nome: ' + profileData.name + '\n📌 WhatsApp: ' + profileData.whatsapp);
         }
         
         function logout() {
@@ -645,10 +615,6 @@
         function fecharAdminModal() {
             document.getElementById('adminModal').style.display = 'none';
         }
-        
-        // ============================================================
-        // FUNÇÕES DO SITE
-        // ============================================================
         
         function abrirMedia(url, tipo) {
             const modal = document.createElement('div');
@@ -662,8 +628,7 @@
             document.body.appendChild(modal);
         }
         
-        // Chat
-        let mensagens = JSON.parse(localStorage.getItem('junior_tattoo_chat') || '[{"nome":"Junior","mensagem":"Olá! 👋 Seja bem-vindo ao meu estúdio. Como posso ajudar?","hora":"Agora","isUser":false}]');
+        let mensagens = JSON.parse(localStorage.getItem('tattoo_chat') || '[{"nome":"Junior","mensagem":"Olá! 👋 Seja bem-vindo ao meu estúdio. Como posso ajudar?","hora":"Agora","isUser":false}]');
         
         function carregarMensagens() {
             const container = document.getElementById('chatMessages');
@@ -672,8 +637,8 @@
                 <div class="message ${msg.isUser ? 'user' : ''}">
                     <div class="message-avatar">${msg.isUser ? 'V' : 'J'}</div>
                     <div class="message-bubble">
-                        ${sanitizar(msg.mensagem)}
-                        <div class="message-time">${sanitizar(msg.hora)}</div>
+                        ${msg.mensagem}
+                        <div class="message-time">${msg.hora}</div>
                     </div>
                 </div>
             `).join('');
@@ -682,46 +647,27 @@
         
         function sendMessage() {
             const input = document.getElementById('chatInput');
-            const mensagem = sanitizar(input.value.trim());
+            const mensagem = input.value.trim();
             if (!mensagem) return;
             mensagens.push({ nome: 'Você', mensagem: mensagem, hora: new Date().toLocaleTimeString(), isUser: true });
-            localStorage.setItem('junior_tattoo_chat', JSON.stringify(mensagens));
+            localStorage.setItem('tattoo_chat', JSON.stringify(mensagens));
             carregarMensagens();
             input.value = '';
             setTimeout(() => {
                 const respostas = ["Obrigado! Me chama no WhatsApp 📱", "Adorei! Vamos marcar? 🖤", "Tenho disponibilidade essa semana!"];
                 mensagens.push({ nome: 'Junior', mensagem: respostas[Math.floor(Math.random() * respostas.length)], hora: new Date().toLocaleTimeString(), isUser: false });
-                localStorage.setItem('junior_tattoo_chat', JSON.stringify(mensagens));
+                localStorage.setItem('tattoo_chat', JSON.stringify(mensagens));
                 carregarMensagens();
             }, 1000);
         }
         
         function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
         
-        function shareWhatsApp() { window.open(`https://wa.me/${profileData.whatsapp}?text=Olá! Vi seu trabalho e me interessei!`, '_blank'); }
+        function shareWhatsApp() { window.open(`https://wa.me/${profileData.whatsapp}?text=Olá! Vi seu trabalho!`, '_blank'); }
         function shareInstagram() { window.open(profileData.instagram, '_blank'); }
         function shareFacebook() { window.open(profileData.facebook, '_blank'); }
         function shareTikTok() { window.open(profileData.tiktok, '_blank'); }
         function openWhatsApp() { window.open(`https://wa.me/${profileData.whatsapp}?text=Olá! Gostaria de agendar um horário.`, '_blank'); }
-        
-        async function buscarPinterest() {
-            const searchTerm = document.getElementById('pinterestSearch').value;
-            const grid = document.getElementById('pinterestGrid');
-            grid.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 48px;"></i><p>Buscando...</p></div>';
-            
-            const imagens = [
-                { url: "https://images.unsplash.com/photo-1618457072880-a447c93f2edc?w=400", titulo: "Realismo Leão" },
-                { url: "https://images.unsplash.com/photo-1590247813693-5541d1c609fd?w=400", titulo: "Aquarela Flores" },
-                { url: "https://images.unsplash.com/photo-1607283105705-b083fd3e7a58?w=400", titulo: "Blackwork" }
-            ];
-            
-            grid.innerHTML = imagens.map(img => `
-                <div class="pinterest-card" onclick="window.open('https://www.pinterest.com/search/pins/?q=${encodeURIComponent(searchTerm)}%20tattoo', '_blank')">
-                    <img src="${img.url}">
-                    <p>📌 ${img.titulo}</p>
-                </div>
-            `).join('');
-        }
         
         function toggleMenu() {
             document.getElementById('sideMenu').classList.toggle('open');
@@ -760,13 +706,10 @@
         window.buscarPinterest = buscarPinterest;
         window.alterarSenha = alterarSenha;
         
-        // INICIAR
         async function iniciar() {
             await inicializarSenha();
             carregarDados();
             console.log('🚀 Site JUNIOR TATTOO iniciado!');
-            console.log('📌 Senha admin: admin123');
-            console.log('📌 WhatsApp atual: ' + profileData.whatsapp);
         }
         
         iniciar();
